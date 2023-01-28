@@ -17,6 +17,7 @@ public class Server {
   public static final String USER_DATA_FILE = "/users.json";
   public static final String TODO_DATA_FILE = "/todos.json";
   private static UserDatabase userDatabase;
+  private static TodoDatabase todoDatabase;
 
   public static void main(String[] args) {
 
@@ -87,8 +88,8 @@ public class Server {
     TodoController todoController = null;
 
     try {
-      todoDatabase = new todoDatabase(TODO_DATA_FILE);
-      todoController = new todoController(todoDatabase);
+      todoDatabase = new TodoDatabase(TODO_DATA_FILE);
+      todoController = new TodoController(todoDatabase);
     } catch (IOException e) {
       System.err.println("The server failed to load the todo data; shutting down.");
       e.printStackTrace(System.err);
