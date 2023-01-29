@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-//import io.javalin.http.BadRequestResponse;
+import io.javalin.http.BadRequestResponse;
 
 /**
  * A fake "database" of todo info
@@ -47,7 +47,7 @@ public class TodoDatabase {
   /**
    * Get an array of all the todos satisfying the queries in the params.
    *
-   * @param queryParams map of key-value paiAdded mers for the query
+   * @param queryParams map of key-value pairs for the query
    * @return an array of all the users matching the given criteria
    */
   public Todo[] listTodos(Map<String, List<String>> queryParams) {
@@ -64,6 +64,19 @@ public class TodoDatabase {
       filteredTodos = filterTodosByCategory(filteredTodos, targetCategory);
     }
     // Process other query parameters here...
+    // Filter status if defined
+    if (queryParams.containsKey("status")) {
+      String statusParam = queryParams.get("status").get(0);
+      boolean targetStatus = false;
+      if (statusParam.contains("complete")) {
+        targetStatus = true;
+      }
+      // Throw BadRequestResponse if the requested status does not match a boolean value (complete/incomplete)
+      if (!statusParam.contains("incomplete")) {
+        throw new BadRequestResponse("Specified status '" + statusParam + "' can't be interpreted as a boolean");
+      }
+      filteredTodos = filterTodosByStatus(filteredTodos, targetStatus);
+    }
 
     return filteredTodos;
   }
@@ -90,6 +103,19 @@ public class TodoDatabase {
    */
   public Todo[] filterTodosByCategory(Todo[] todos, String targetCategory) {
     return Arrays.stream(todos).filter(x -> x.category.equals(targetCategory)).toArray(Todo[]::new);
+  }
+
+  /**
+   * Get an array of all the todos having the target status.
+   *
+   * @param todos     the list of todos to filter by status
+   * @param targetStatus the target status to look for
+   * @return an array of all the todos from the given list that have the target
+   *         status
+   *
+   */
+  public Todo[] filterTodosByStatus(Todo[] todos, Boolean targetStatus) {
+    return Arrays.stream(todos).filter(x -> x.status = targetStatus).toArray(Todo[]::new);
   }
 
 }
