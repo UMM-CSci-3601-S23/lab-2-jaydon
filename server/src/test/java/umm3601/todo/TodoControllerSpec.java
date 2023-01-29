@@ -1,6 +1,7 @@
 package umm3601.todo;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -222,6 +223,24 @@ public class TodoControllerSpec {
       todoController.getTodos(ctx);
     });
     assertEquals("Specified status '" + "abc" + "' can't be interpreted as a boolean", exception.getMessage());
+  }
+
+  @Test
+  public void canGetTodosWithStringInBody() throws IOException {
+    Map<String, List<String>> queryParams = new HashMap<>();
+    // Start checking for incomplete status instead
+    queryParams.put("contains", Arrays.asList(new String[] {"reprehenderit"}));
+    when(ctx.queryParamMap()).thenReturn(queryParams);
+
+    todoController.getTodos(ctx);
+
+    ArgumentCaptor<Todo[]> argument = ArgumentCaptor.forClass(Todo[].class);
+    verify(ctx).json(argument.capture());
+    for (Todo todo : argument.getValue()) {
+      assertTrue(todo.body.toLowerCase().contains("reprehenderit"));
+    }
+    assertEquals(96 - 12, argument.getValue().length);
+    // ctrl+f reprehenderit -12 duplicates
   }
 
 }
