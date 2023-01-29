@@ -70,9 +70,8 @@ public class TodoDatabase {
       boolean targetStatus = false;
       if (statusParam.equals("complete")) {
         targetStatus = true;
-      }
-      // Throw BadRequestResponse if the requested status does not match a boolean value (complete/incomplete)
-      else if (!statusParam.contains("incomplete")) {
+      } else if (!statusParam.contains("incomplete")) {
+        // Throw BadRequestResponse if the requested status does not match a boolean value (complete/incomplete)
         throw new BadRequestResponse("Specified status '" + statusParam + "' can't be interpreted as a boolean");
       }
       filteredTodos = filterTodosByStatus(filteredTodos, targetStatus);
