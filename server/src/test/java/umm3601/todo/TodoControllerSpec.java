@@ -15,14 +15,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-//import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assertions;
 //import org.junit.jupiter.api.BeforeEach;
 //import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 //import io.javalin.http.BadRequestResponse;
-//import io.javalin.http.HttpStatus;
-//import io.javalin.http.NotFoundResponse;
+import io.javalin.http.HttpStatus;
+import io.javalin.http.NotFoundResponse;
 
 
 /**
@@ -143,6 +143,32 @@ public class TodoControllerSpec {
       assertEquals("software design", todo.category);
     }
     assertEquals(10, argument.getValue().length);
+  }
+
+  @Test
+  public void canGetTodosWithSpecifiedId() throws IOException {
+    String id = "58895985140cca06def60d82";
+    Todo todo = db.getTodo(id);
+
+    when(ctx.pathParam("id")).thenReturn(id);
+
+    todoController.getTodo(ctx);
+
+    verify(ctx).json(todo);
+    verify(ctx).status(HttpStatus.OK);
+    assertEquals("Fry", todo.owner);
+    assertEquals("video games", todo.category);
+    assertEquals(false, todo.status);
+
+  }
+
+  @Test
+  public void respondsAppropriatelyToRequestForNonexistentId() throws IOException {
+    when(ctx.pathParam("id")).thenReturn(null);
+    Throwable exception = Assertions.assertThrows(NotFoundResponse.class, () -> {
+      todoController.getTodo(ctx);
+    });
+    assertEquals("No todo with id " + null + " was found.", exception.getMessage());
   }
 
 }
