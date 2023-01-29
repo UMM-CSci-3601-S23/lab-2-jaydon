@@ -243,4 +243,45 @@ public class TodoControllerSpec {
     // ctrl+f reprehenderit -12 duplicates
   }
 
+  @Test
+  public void canLimitTodos() throws IOException {
+    Map<String, List<String>> queryParams = new HashMap<>();
+    // Gather an arbitrary combination of parameters after setting the item limit to 7
+    queryParams.put("limit", Arrays.asList(new String[] {"7"}));
+    queryParams.put("category", Arrays.asList(new String[] {"homework"}));
+    queryParams.put("status", Arrays.asList(new String[] {"incomplete"}));
+    when(ctx.queryParamMap()).thenReturn(queryParams);
+
+    todoController.getTodos(ctx);
+
+    ArgumentCaptor<Todo[]> argument = ArgumentCaptor.forClass(Todo[].class);
+    verify(ctx).json(argument.capture());
+
+    assertEquals(7, argument.getValue().length);
+    // Make sure the order of items hasn't changed either. Check the id of first and last returned items
+    assertEquals("5889598585bda42fb8388ba1", argument.getValue()[0]._id);
+    assertEquals("58895985ea08e3fe6f31e42e", argument.getValue()[argument.getValue().length - 1]._id);
+  }
+  /* The limit parameter could be tested more thoroughly by ensuring that no limit is actually applied when
+   * we request a limit larger than the total number of todos returned after filtering the list.
+   * However, for the purposes of this lab I am willing to believe stream().limit() functions properly to
+   * control this kind of situation on its own.
+   */
+
+  @Test
+  public void respondsAppropriatelyToIllegalLimit() {
+    Map<String, List<String>> queryParams = new HashMap<>();
+    // Assign arbitrary value to limit that does not correspond to an integer
+    queryParams.put("limit", Arrays.asList(new String[] {"abc"}));
+    when(ctx.queryParamMap()).thenReturn(queryParams);
+
+    // This should now throw a `BadRequestResponse` exception because
+    // our request has a limit that doesn't correspond to an integer
+    Throwable exception = Assertions.assertThrows(BadRequestResponse.class, () -> {
+      todoController.getTodos(ctx);
+    });
+    assertEquals("Specified limit '" + "abc"
+    + "' can't be parsed to an integer", exception.getMessage());
+  }
+
 }
