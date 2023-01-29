@@ -239,7 +239,7 @@ public class TodoControllerSpec {
     for (Todo todo : argument.getValue()) {
       assertTrue(todo.body.toLowerCase().contains("reprehenderit"));
     }
-    assertEquals(96-12, argument.getValue().length);
+    assertEquals(96 - 12, argument.getValue().length);
     // ctrl+f reprehenderit -12 duplicates
   }
 
