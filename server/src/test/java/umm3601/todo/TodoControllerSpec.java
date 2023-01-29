@@ -50,7 +50,8 @@ public class TodoControllerSpec {
 
   @Test
   public void canGetSize() throws IOException {
-    // I don't understand why this is necessary in the slightest to get the project to build but whatever... i'll work on this more tomorrow
+    // I don't understand why this is necessary in the slightest to get the
+    // project to build but whatever... i'll work on this more tomorrow
     db.size();
   }
 
