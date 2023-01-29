@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Assertions;
 //import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
-//import io.javalin.http.BadRequestResponse;
+import io.javalin.http.BadRequestResponse;
 import io.javalin.http.HttpStatus;
 import io.javalin.http.NotFoundResponse;
 
@@ -169,6 +169,59 @@ public class TodoControllerSpec {
       todoController.getTodo(ctx);
     });
     assertEquals("No todo with id " + null + " was found.", exception.getMessage());
+  }
+
+  @Test
+  public void canGetTodosWithStatusComplete() throws IOException {
+    Map<String, List<String>> queryParams = new HashMap<>();
+    queryParams.put("status", Arrays.asList(new String[] {"complete"}));
+    when(ctx.queryParamMap()).thenReturn(queryParams);
+
+    // Call the method on the mock controller with the added
+    // query param map to limit the result to just todos with
+    // a complete status
+    todoController.getTodos(ctx);
+
+    // Confirm that all the users passed to `json` have status "complete"
+    ArgumentCaptor<Todo[]> argument = ArgumentCaptor.forClass(Todo[].class);
+    verify(ctx).json(argument.capture());
+    for (Todo todo : argument.getValue()) {
+      assertEquals(true, todo.status);
+    }
+    // Confirm that there are 143 todos with complete status
+    assertEquals(143, argument.getValue().length);
+  }
+
+  @Test
+  public void canGetTodosWithStatusIncomplete() throws IOException {
+    Map<String, List<String>> queryParams = new HashMap<>();
+    // Start checking for incomplete status instead
+    queryParams.put("status", Arrays.asList(new String[] {"incomplete"}));
+    when(ctx.queryParamMap()).thenReturn(queryParams);
+
+    todoController.getTodos(ctx);
+
+    ArgumentCaptor<Todo[]> argument = ArgumentCaptor.forClass(Todo[].class);
+    verify(ctx).json(argument.capture());
+    for (Todo todo : argument.getValue()) {
+      assertEquals(false, todo.status);
+    }
+    assertEquals(157, argument.getValue().length);
+  }
+
+  @Test
+  public void respondsAppropriatelyToIllegalStatus() {
+    // We'll set the requested "status" to be a String that can't be understood as a boolean
+    Map<String, List<String>> queryParams = new HashMap<>();
+    queryParams.put("status", Arrays.asList(new String[] {"abc"}));
+    when(ctx.queryParamMap()).thenReturn(queryParams);
+
+    // This should now throw a `BadRequestResponse` exception because
+    // our request has a status that doesn't correspond to a boolean
+    Throwable exception = Assertions.assertThrows(BadRequestResponse.class, () -> {
+      todoController.getTodos(ctx);
+    });
+    assertEquals("Specified status '" + "abc" + "' can't be interpreted as a boolean", exception.getMessage());
   }
 
 }

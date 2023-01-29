@@ -68,11 +68,11 @@ public class TodoDatabase {
     if (queryParams.containsKey("status")) {
       String statusParam = queryParams.get("status").get(0);
       boolean targetStatus = false;
-      if (statusParam.contains("complete")) {
+      if (statusParam.equals("complete")) {
         targetStatus = true;
       }
       // Throw BadRequestResponse if the requested status does not match a boolean value (complete/incomplete)
-      if (!statusParam.contains("incomplete")) {
+      else if (!statusParam.contains("incomplete")) {
         throw new BadRequestResponse("Specified status '" + statusParam + "' can't be interpreted as a boolean");
       }
       filteredTodos = filterTodosByStatus(filteredTodos, targetStatus);
@@ -114,8 +114,8 @@ public class TodoDatabase {
    *         status
    *
    */
-  public Todo[] filterTodosByStatus(Todo[] todos, Boolean targetStatus) {
-    return Arrays.stream(todos).filter(x -> x.status = targetStatus).toArray(Todo[]::new);
+  public Todo[] filterTodosByStatus(Todo[] todos, boolean targetStatus) {
+    return Arrays.stream(todos).filter(x -> x.status == targetStatus).toArray(Todo[]::new);
   }
 
 }
