@@ -63,8 +63,7 @@ public class TodoDatabase {
       String targetCategory = queryParams.get("category").get(0);
       filteredTodos = filterTodosByCategory(filteredTodos, targetCategory);
     }
-    // Process other query parameters here...
-    // Filter status if defined
+    // Filter status if defined, changing String parameter to a corresponding boolean
     if (queryParams.containsKey("status")) {
       String statusParam = queryParams.get("status").get(0);
       boolean targetStatus = false;
@@ -75,6 +74,11 @@ public class TodoDatabase {
         throw new BadRequestResponse("Specified status '" + statusParam + "' can't be interpreted as a boolean");
       }
       filteredTodos = filterTodosByStatus(filteredTodos, targetStatus);
+    }
+    // Filter body if defined
+    if (queryParams.containsKey("contains")) {
+      String targetString = queryParams.get("contains").get(0);
+      filteredTodos = filterTodosByBody(filteredTodos, targetString);
     }
 
     return filteredTodos;
@@ -115,6 +119,19 @@ public class TodoDatabase {
    */
   public Todo[] filterTodosByStatus(Todo[] todos, boolean targetStatus) {
     return Arrays.stream(todos).filter(x -> x.status == targetStatus).toArray(Todo[]::new);
+  }
+
+  /**
+   * Get an array of all the todos having the target String in their body.
+   *
+   * @param todos     the list of todos to filter by body
+   * @param targetString the target String to look for
+   * @return an array of all the todos from the given list that have the target
+   *         String in their body
+   *
+   */
+  public Todo[] filterTodosByBody(Todo[] todos, String targetString) {
+    return Arrays.stream(todos).filter(x -> x.body.contains(targetString)).toArray(Todo[]::new);
   }
 
 }
