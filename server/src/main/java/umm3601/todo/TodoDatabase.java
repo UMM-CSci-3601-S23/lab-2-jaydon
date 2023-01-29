@@ -85,9 +85,9 @@ public class TodoDatabase {
     if (queryParams.containsKey("orderBy")) {
       String toOrderBy = queryParams.get("orderBy").get(0).toLowerCase();
       if (!toOrderBy.equals("owner")
-      || !toOrderBy.equals("body")
-      || !toOrderBy.equals("status")
-      || !toOrderBy.equals("category")) {
+      && !toOrderBy.equals("body")
+      && !toOrderBy.equals("status")
+      && !toOrderBy.equals("category")) {
         throw new BadRequestResponse("Specified value to order by '" + toOrderBy + "' is an invalid value");
       } else {
         filteredTodos = orderTodos(filteredTodos, toOrderBy);
