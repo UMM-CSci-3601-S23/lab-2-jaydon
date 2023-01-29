@@ -80,6 +80,21 @@ public class TodoDatabase {
       String targetString = queryParams.get("contains").get(0);
       filteredTodos = filterTodosByBody(filteredTodos, targetString);
     }
+    // Order by value if defined (IMPORTANT that this happens before limiting)
+    /*if (queryParams.containsKey("orderBy")) {
+      // code will happen here with issue #8
+    }*/
+    // Limit results if defined
+    if (queryParams.containsKey("limit")) {
+      try {
+        int limit = Integer.parseInt(queryParams.get("limit").get(0));
+        filteredTodos = filterTodosByLimit(filteredTodos, limit);
+      } catch (NumberFormatException e) {
+        throw new BadRequestResponse("Specified limit '" + queryParams.get("limit").get(0)
+        + "' can't be parsed to an integer");
+      }
+
+    }
 
     return filteredTodos;
   }
@@ -133,6 +148,20 @@ public class TodoDatabase {
   public Todo[] filterTodosByBody(Todo[] todos, String targetString) {
     return Arrays.stream(todos).filter(x -> x.body.toLowerCase()
     .contains(targetString.toLowerCase())).toArray(Todo[]::new);
+  }
+
+  /**
+   * Get an array of all the todos in order within the specified limit.
+   *
+   * @param todos     the list of todos to filter by body
+   * @param targetLimit the maximum amount of todos to be returned
+   * @return an array of all the todos from the given list such that the array size
+   *         does not exceed the specified limit
+   *
+   */
+  public Todo[] filterTodosByLimit(Todo[] todos, int targetLimit) {
+    // learning from the stream documentation here...
+    return Arrays.stream(todos).limit(targetLimit).toArray(Todo[]::new);
   }
 
 }
