@@ -284,4 +284,87 @@ public class TodoControllerSpec {
     + "' can't be parsed to an integer", exception.getMessage());
   }
 
+  @Test
+  public void canOrderTodosByOwner() {
+    Map<String, List<String>> queryParams = new HashMap<>();
+    queryParams.put("orderBy", Arrays.asList(new String[] {"owner"}));
+    when(ctx.queryParamMap()).thenReturn(queryParams);
+
+    todoController.getTodos(ctx);
+
+    ArgumentCaptor<Todo[]> argument = ArgumentCaptor.forClass(Todo[].class);
+    verify(ctx).json(argument.capture());
+
+    assertEquals(db.size(), argument.getValue().length);
+    // Make sure the first name in the alphabet appears first, and same idea with the last.
+    assertEquals("Barry", argument.getValue()[0].owner);
+    assertEquals("Workman", argument.getValue()[argument.getValue().length - 1].owner);
+  }
+
+  @Test
+  public void canOrderTodosByBody() {
+    Map<String, List<String>> queryParams = new HashMap<>();
+    queryParams.put("orderBy", Arrays.asList(new String[] {"body"}));
+    when(ctx.queryParamMap()).thenReturn(queryParams);
+
+    todoController.getTodos(ctx);
+
+    ArgumentCaptor<Todo[]> argument = ArgumentCaptor.forClass(Todo[].class);
+    verify(ctx).json(argument.capture());
+
+    assertEquals(db.size(), argument.getValue().length);
+    // Check that the list items are sorted by body
+    assertTrue(argument.getValue()[0].body.startsWith("Ad "));
+    assertTrue(argument.getValue()[argument.getValue().length - 1].body.startsWith("Volu"));
+  }
+
+  @Test
+  public void canOrderTodosByStatus() {
+    Map<String, List<String>> queryParams = new HashMap<>();
+    queryParams.put("orderBy", Arrays.asList(new String[] {"status"}));
+    when(ctx.queryParamMap()).thenReturn(queryParams);
+
+    todoController.getTodos(ctx);
+
+    ArgumentCaptor<Todo[]> argument = ArgumentCaptor.forClass(Todo[].class);
+    verify(ctx).json(argument.capture());
+
+    assertEquals(db.size(), argument.getValue().length);
+    // You get the gist by now
+    assertEquals(false, argument.getValue()[0].status);
+    assertEquals(true, argument.getValue()[argument.getValue().length - 1].status);
+  }
+
+  @Test
+  public void canOrderTodosByCategory() {
+    Map<String, List<String>> queryParams = new HashMap<>();
+    queryParams.put("orderBy", Arrays.asList(new String[] {"category"}));
+    when(ctx.queryParamMap()).thenReturn(queryParams);
+
+    todoController.getTodos(ctx);
+
+    ArgumentCaptor<Todo[]> argument = ArgumentCaptor.forClass(Todo[].class);
+    verify(ctx).json(argument.capture());
+
+    assertEquals(db.size(), argument.getValue().length);
+
+    assertEquals("groceries", argument.getValue()[0].category);
+    assertEquals("video games", argument.getValue()[argument.getValue().length - 1].category);
+  }
+
+  @Test
+  public void respondsAppropriatelyToIllegalOrderArgument() {
+    Map<String, List<String>> queryParams = new HashMap<>();
+    // Assign arbitrary value to limit that does not correspond to an integer
+    queryParams.put("orderBy", Arrays.asList(new String[] {"abc"}));
+    when(ctx.queryParamMap()).thenReturn(queryParams);
+
+    // This should now throw a `BadRequestResponse` exception because
+    // our request has a limit that doesn't correspond to an integer
+    Throwable exception = Assertions.assertThrows(BadRequestResponse.class, () -> {
+      todoController.getTodos(ctx);
+    });
+    assertEquals("Specified value to order by '" + "abc" + "' is an invalid value", exception.getMessage());
+  }
+
 }

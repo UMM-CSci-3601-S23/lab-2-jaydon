@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Comparator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.javalin.http.BadRequestResponse;
@@ -80,10 +81,18 @@ public class TodoDatabase {
       String targetString = queryParams.get("contains").get(0);
       filteredTodos = filterTodosByBody(filteredTodos, targetString);
     }
-    // Order by value if defined (IMPORTANT that this happens before limiting)
-    /*if (queryParams.containsKey("orderBy")) {
-      // code will happen here with issue #8
-    }*/
+    // Order by field if defined
+    if (queryParams.containsKey("orderBy")) {
+      String toOrderBy = queryParams.get("orderBy").get(0).toLowerCase();
+      if (!toOrderBy.equals("owner")
+      && !toOrderBy.equals("body")
+      && !toOrderBy.equals("status")
+      && !toOrderBy.equals("category")) {
+        throw new BadRequestResponse("Specified value to order by '" + toOrderBy + "' is an invalid value");
+      } else {
+        filteredTodos = orderTodos(filteredTodos, toOrderBy);
+      }
+    }
     // Limit results if defined
     if (queryParams.containsKey("limit")) {
       try {
@@ -151,9 +160,35 @@ public class TodoDatabase {
   }
 
   /**
+   * Sort all the todos ordered in alphabetical order of a given value.
+   *
+   * @param todos     the list of todos to order
+   * @param toOrderBy the value in User that the list will be ordered with
+   * @return the sorted array of todos
+   *
+   */
+  public Todo[] orderTodos(Todo[] todos, String toOrderBy) {
+    // credit to tobias_k on StackOverflow for the Comparator solution.
+    // https://stackoverflow.com/questions/27929533/sorting-array-of-objects-by-field
+    if (toOrderBy.equals("owner")) {
+      Arrays.sort(todos, Comparator.comparing(x -> x.owner));
+    }
+    if (toOrderBy.equals("body")) {
+      Arrays.sort(todos, Comparator.comparing(x -> x.body));
+    }
+    if (toOrderBy.equals("status")) {
+      Arrays.sort(todos, Comparator.comparing(x -> String.valueOf(x.status)));
+    }
+    if (toOrderBy.equals("category")) {
+      Arrays.sort(todos, Comparator.comparing(x -> x.category));
+    }
+    return todos;
+  }
+
+  /**
    * Get an array of all the todos in order within the specified limit.
    *
-   * @param todos     the list of todos to filter by body
+   * @param todos     the list of todos to limit
    * @param targetLimit the maximum amount of todos to be returned
    * @return an array of all the todos from the given list such that the array size
    *         does not exceed the specified limit
