@@ -23,6 +23,7 @@ public class Server {
 
     // Initialize dependencies
     UserController userController = buildUserController();
+    TodoController todoController = buildTodoController();
 
     Javalin server = Javalin.create(config -> {
       // This tells the server where to look for static files,

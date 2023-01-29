@@ -4,9 +4,9 @@ package umm3601.todo;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-//import java.util.Arrays;
-//import java.util.List;
-//import java.util.Map;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 //import io.javalin.http.BadRequestResponse;
@@ -36,7 +36,7 @@ public class TodoDatabase {
   /**
    * Get an array of all the todos satisfying the queries in the params.
    *
-   * @param queryParams map of key-value pairs for the query
+   * @param queryParams map of key-value paiAdded mers for the query
    * @return an array of all the users matching the given criteria
    */
   public Todo[] listTodos(Map<String, List<String>> queryParams) {
@@ -45,7 +45,6 @@ public class TodoDatabase {
     // Filter owner if defined
     if (queryParams.containsKey("owner")) {
       String targetOwner = queryParams.get("owner").get(0);
-      String targetOwner = Integer.parseInt(ageParam);
       filteredTodos = filterTodosByOwner(filteredTodos, targetOwner);
     }
     // Filter category if defined
